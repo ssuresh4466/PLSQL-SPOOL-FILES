@@ -1,0 +1,397 @@
+SQL> create or replace procedure proc_ename(vsal  number)
+  2  is
+  3  vename  varchar2(10);
+  4  begin
+  5  select ename into vename
+  6  from emp
+  7  where sal=vsal;
+  8  dbms_OUTPUT.PUT_LINE(VENAME);
+  9  END PROC_ENAME;
+ 10  /
+
+Procedure created.
+
+SQL> EXEC PROC_ENAME('5000');
+KING                                                                                                                                                                                                                                  
+
+PL/SQL procedure successfully completed.
+
+SQL> EXEC PROC_ENAME('3000');
+BEGIN PROC_ENAME('3000'); END;
+
+*
+ERROR at line 1:
+ORA-01422: exact fetch returns more than requested number of rows 
+ORA-06512: at "DINESH830.PROC_ENAME", line 5 
+ORA-06512: at line 1 
+
+
+SQL> EXEC PROC_ENAME('2000');
+BEGIN PROC_ENAME('2000'); END;
+
+*
+ERROR at line 1:
+ORA-01403: no data found 
+ORA-06512: at "DINESH830.PROC_ENAME", line 5 
+ORA-06512: at line 1 
+
+
+SQL> --write a procedure to display emp names , with given salary?
+SQL> --if no emp with that salary or multiple emps with same salary then
+SQL> --display user defined error?
+SQL> 
+SQL> 
+SQL>   CREATE OR REPLACE PROCEDURE PROC_EXCEP
+  2    (VSAL  NUMBER)
+  3    IS
+  4    VNAME EMP.ENAME%TYPE;
+  5    VJOB  EMP.JOB%TYPE;
+  6    BEGIN
+  7    SELECT ename,job
+  8              INTO
+  9    vname,vjob
+ 10    from emp
+ 11    where sal=vsal;
+ 12    dbms_output.put_line
+ 13    (
+ 14  chr(10)||'Name of emp:  '||vname||chr(10)||
+ 15           'Job of emp:   '||vjob);
+ 16    dbms_output.put_line(' End of procedure ');
+ 17    EXCEPTION
+ 18    WHEN TOO_MANY_ROWS THEN
+ 19     DBMS_OUTPUT.PUT_LINE
+ 20    ('Multiple emps getting same salary');
+ 21    DBMS_OUTPUT.PUT_LINE
+ 22    (' selecting data from multiple records
+ 23    is not yet possible without using cursors');
+ 24    WHEN NO_DATA_FOUND THEN
+ 25    DBMS_OUTPUT.PUT_LINE
+ 26    ('No emp Getting the salary:  '||vsal);
+ 27    end proc_excep;
+ 28  /
+
+Procedure created.
+
+SQL> exec proc_excep(5000);
+
+Name of emp:  KING
+Job of emp:   PRESIDENT                                                                                                                                                                                           
+End of procedure                                                                                                                                                                                                                      
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_excep(3000);
+Multiple emps getting same salary                                                                                                                                                                                                     
+selecting data from multiple records
+  is not yet possible without using cursors                                                                                                                                                      
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_excep(2000);
+No emp Getting the salary:  2000                                                                                                                                                                                                      
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> create or replace procedure proc_cust_act_dtls
+  2  (vcid cust_act_dtls.cno%type)
+  3  is
+  4  act_info  cust_act_dtls%rowtype;
+  5  begin
+  6  select * into act_info
+  7  from cust_act_dtls
+  8  where cno=vcid;
+  9  dbms_output.put_line
+ 10  (' Account information for custid:   '|| vcid);
+ 11  dbms_output.put_line
+ 12  ('------------------------------------------------------------');
+ 13  dbms_output.put_line
+ 14  ('Account number:         '||act_info.actno);
+ 15  dbms_output.put_line
+ 16  ('Account type:           '||act_info.act_type);
+ 17  dbms_output.put_line
+ 18  ('Account Open Dt:        '||act_info.act_open_date);
+ 19  dbms_output.put_line
+ 20  ('Account Balance:        '||act_info.act_bal);
+ 21  EXCEPTION
+ 22  WHEN no_data_found then
+ 23  dbms_output.put_line(' Customer has no account OR custid does not existed ');
+ 24  WHEN too_many_rows then
+ 25  dbms_output.put_line(' Customer has multiple accounts');
+ 26  end proc_cust_act_dtls;
+ 27  /
+
+Procedure created.
+
+SQL> exec proc_cust_act_dtls(11110);
+Account information for custid:   11110                                                                                                                                                                                               
+------------------------------------------------------------                                                                                                                                                                          
+Account number:         20035201471                                                                                                                                                                                                   
+Account type:           SAL                                                                                                                                                                                                           
+Account Open Dt:        21-MAY-11                                                                                                                                                                                                     
+Account Balance:        45000                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_cust_act_dtls(11111);
+Account information for custid:   11111                                                                                                                                                                                               
+------------------------------------------------------------                                                                                                                                                                          
+Account number:         20035201473                                                                                                                                                                                                   
+Account type:           SB                                                                                                                                                                                                            
+Account Open Dt:        01-MAR-12                                                                                                                                                                                                     
+Account Balance:        23000                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_cust_act_dtls(11112);
+Customer has multiple accounts                                                                                                                                                                                                        
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_cust_act_dtls(11120);
+Customer has no account OR custid does not existed                                                                                                                                                                                    
+
+PL/SQL procedure successfully completed.
+
+SQL> 	create or replace procedure proc_emp_comm
+  2  	( veno  emp.empno%type)
+  3  	is
+  4  	vcomm emp.comm%type;
+  5  
+  6  /* Declaring Exception type variable ,
+  7  Then it is acting as exception Handler.
+  8  we can define exception handler in exception block */
+  9  
+ 10  	comm_miss     exception;
+ 11  	BEGIN
+ 12  	select comm into vcomm from emp
+ 13  	where empno=veno;
+ 14  
+ 15  	if vcomm is null then
+ 16  	RAISE comm_miss;
+ 17  	else
+ 18  	dbms_output.put_line
+ 19  	(chr(10)||' comm of  '||veno||'  is : '||vcomm);
+ 20  	end if;
+ 21  	EXCEPTION
+ 22  	when no_data_found then
+ 23  	dbms_output.put_line
+ 24                  (chr(10)||' No employee with  id:  '||veno);
+ 25  	when Too_many_rows then
+ 26  	dbms_output.put_line
+ 27  	(chr(10)||' Duplicate empid existed');
+ 28  	when comm_miss then
+ 29  	dbms_output.put_line
+ 30  	(chr(10)||' Employee commission is NULL ');
+ 31  	end proc_emp_comm;
+ 32  /
+
+Procedure created.
+
+SQL> exec proc_emp_comm(7654);
+
+ comm of  7654  is : 1400                                                                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_emp_comm(7778);
+
+ No employee with  id:  7778                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_emp_comm(7788);
+
+ Employee commission is NULL                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> cl scr;
+
+SQL> select constraint_name from user_constraints
+  2  where table_name='PROD_DTLS';
+
+CONSTRAINT_NAME                                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------                                                                                                      
+FK_COMP_CODE                                                                                                                                                                                                                          
+
+SQL> ALTER TABLE PROD_DTLS
+  2  DROP CONSTRAINT FK_COMP_CODE;
+
+Table altered.
+
+SQL> ALTER TABLE PROD_DTLS
+  2  ADD CONSTRAINT FK_CMP_CODE FOREIGN KEY(COMP_CODE)
+  3  REFERENCES COMP_DTLS(COMP_CODE);
+
+Table altered.
+
+SQL> SELECT * FROM COMP_DTLS;
+
+COMP_CODE  COMP_NAME            CITY                                                                                                                                                                                                  
+---------- -------------------- ----------                                                                                                                                                                                            
+I101       IBM                  NEW YORK                                                                                                                                                                                              
+W202       WIPRO                CHICAGO                                                                                                                                                                                               
+D303       DELL                 TEXAS                                                                                                                                                                                                 
+S404       SAMSUNG              KOREA                                                                                                                                                                                                 
+
+SQL> SELECT * FROM PROD_DTLS;
+
+PROD_CODE  PROD_NAME                  COST MFG       WARRENTY   COMP_CODE                                                                                                                                                             
+---------- -------------------- ---------- --------- ---------- ----------                                                                                                                                                            
+ILTPQS     LAPTOP                    45000 11-FEB-12 4 YEARS    I101                                                                                                                                                                  
+ILTPXS     LAPTOP                    34000 21-MAR-12 4 YEARS    I101                                                                                                                                                                  
+ILTPZS     LAPTOP                    40000 12-FEB-13 7 YEARS    I101                                                                                                                                                                  
+WDTPG      DESKTOP                   23000 30-OCT-12 1 YEAR     W202                                                                                                                                                                  
+WCFLL      LIGHTS                     3400 22-JAN-13 2 YEARS    W202                                                                                                                                                                  
+DDTPW      DESKTOP                   27000 13-NOV-12 5 YEARS    D303                                                                                                                                                                  
+DLTPG      LAPTOP                    46000 08-JAN-13 2 YEARS    D303                                                                                                                                                                  
+DMBLY      MOBILE                    32000 10-JAN-13            D303                                                                                                                                                                  
+SLTPC      LAPTOP                    34000 04-DEC-12 6 MONTHS   S404                                                                                                                                                                  
+SLTPD      LAPTOP                    45000 09-DEC-12 2 YEARS    S404                                                                                                                                                                  
+SMBLGLXY   MOBILE                    24000 10-JAN-12 1 YEAR     S404                                                                                                                                                                  
+
+PROD_CODE  PROD_NAME                  COST MFG       WARRENTY   COMP_CODE                                                                                                                                                             
+---------- -------------------- ---------- --------- ---------- ----------                                                                                                                                                            
+SMBLGLXG   MOBILE                    21500 02-FEB-13 1 YEAR     S404                                                                                                                                                                  
+
+12 rows selected.
+
+SQL> DELETE FROM COMP_DTLS WHERE COMP_NAME='SAMSUNG';
+DELETE FROM COMP_DTLS WHERE COMP_NAME='SAMSUNG'
+*
+ERROR at line 1:
+ORA-02292: integrity constraint (DINESH830.FK_CMP_CODE) violated - child record found 
+
+
+SQL> create or replace procedure proc_COMP_DEL
+  2  (vcmpname  comp_dtls.comp_name%type)
+  3  is
+  4  COMP_del  exception;
+  5  pragma exception_init(COMP_del,-02292);
+  6  begin
+  7  delete from comp_dtls
+  8  where comp_name=vcmpname;
+  9  Exception
+ 10  when COMP_del then
+ 11  dbms_output.put_line
+ 12  (' Dont delete company, since we have products');
+ 13  end proc_parent_delete;
+ 14  /
+
+Warning: Procedure created with compilation errors.
+
+SQL> SHOW ERRORS;
+Errors for PROCEDURE PROC_COMP_DEL:
+
+LINE/COL ERROR                                                                                                                                                                                                                        
+-------- -----------------------------------------------------------------                                                                                                                                                            
+13/5     PLS-00113: END identifier 'PROC_PARENT_DELETE' must match                                                                                                                                                                    
+         'PROC_COMP_DEL' at line 1, column 11                                                                                                                                                                                         
+                                                                                                                                                                                                                                      
+SQL> create or replace procedure proc_COMP_DEL
+  2  (vcmpname  comp_dtls.comp_name%type)
+  3  is
+  4  COMP_del  exception;
+  5  pragma exception_init(COMP_del,-02292);
+  6  begin
+  7  delete from comp_dtls
+  8  where comp_name=vcmpname;
+  9  Exception
+ 10  when COMP_del then
+ 11  dbms_output.put_line
+ 12  (' Dont delete company, since we have products');
+ 13  end proc_COMP_DEL;
+ 14  /
+
+Procedure created.
+
+SQL> EXEC PROC_COMP_DEL('DELL');
+Dont delete company, since we have products                                                                                                                                                                                           
+
+PL/SQL procedure successfully completed.
+
+SQL> create or replace procedure proc_deposit
+  2  (
+  3  vactno cust_act_dtls.actno%type,
+  4  vamt  int
+  5  )
+  6  is
+  7  vbal  number;
+  8  begin
+  9  --Before deposit display Old Balance
+ 10  select act_bal into vbal
+ 11  from cust_act_dtls
+ 12  where actno=vactno;
+ 13  dbms_output.put_line
+ 14  (chr(10)||' Old balance:     '||vbal);
+ 15  if vamt<100 or vamt>49900 then
+ 16  raise_application_error
+ 17  (-20003,'Please enter valid amount, Min. 100 and Max. 49900');
+ 18  rollback;
+ 19  else
+ 20  update cust_act_dtls
+ 21  set act_bal=act_bal+vamt
+ 22  where actno=vactno;
+ 23  commit;
+ 24  dbms_output.put_line
+ 25  (chr(10)||' Deposited  Rs.      '||vamt||'   successfully');
+ 26  END IF;
+ 27  select act_bal into vbal
+ 28  from cust_act_dtls
+ 29  where actno=vactno;
+ 30  dbms_output.put_line
+ 31  (chr(10)||'New Balance:       '||vbal);
+ 32  dbms_output.put_line
+ 33  (' Transaction completed Successfully. ');
+ 34  end proc_deposit;
+ 35  /
+
+Procedure created.
+
+SQL> EXEC PROC_DEPOSIT(20035201482,5000);
+BEGIN PROC_DEPOSIT(20035201482,5000); END;
+
+*
+ERROR at line 1:
+ORA-01403: no data found 
+ORA-06512: at "DINESH830.PROC_DEPOSIT", line 10 
+ORA-06512: at line 1 
+
+
+SQL> EXEC PROC_DEPOSIT(20035201470,5000);
+
+ Old balance:     49000                                                                                                                                                                                                              
+
+ Deposited  Rs.      5000   successfully                                                                                                                                                                                             
+
+New Balance:       54000                                                                                                                                                                                                             
+Transaction completed Successfully.                                                                                                                                                                                                   
+
+PL/SQL procedure successfully completed.
+
+SQL> EXEC PROC_DEPOSIT(20035201470,50);
+
+ Old balance:     54000                                                                                                                                                                                                              
+BEGIN PROC_DEPOSIT(20035201470,50); END;
+
+*
+ERROR at line 1:
+ORA-20003: Please enter valid amount, Min. 100 and Max. 49900 
+ORA-06512: at "DINESH830.PROC_DEPOSIT", line 16 
+ORA-06512: at line 1 
+
+
+SQL> EXEC PROC_DEPOSIT(20035201470,50000);
+
+ Old balance:     54000                                                                                                                                                                                                              
+BEGIN PROC_DEPOSIT(20035201470,50000); END;
+
+*
+ERROR at line 1:
+ORA-20003: Please enter valid amount, Min. 100 and Max. 49900 
+ORA-06512: at "DINESH830.PROC_DEPOSIT", line 16 
+ORA-06512: at line 1 
+
+
+SQL> SPOOL OFF;

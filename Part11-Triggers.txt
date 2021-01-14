@@ -1,0 +1,144 @@
+SQL> 
+SQL> --how to find contstraints on a table?
+SQL> 
+SQL> select constraint_name from user_constraints
+  2  where table_name='STUD';
+
+CONSTRAINT_NAME                                                                 
+--------------------------------------------------------------------------------
+SYS_C009248                                                                     
+SYS_C009249                                                                     
+SYS_C009250                                                                     
+SYS_C009252                                                                     
+SYS_C009253                                                                     
+SYS_C009254                                                                     
+SYS_C009255                                                                     
+SYS_C009257                                                                     
+
+8 rows selected.
+
+SQL> select constraint_name from user_constraints
+  2  where table_name='stud';
+
+no rows selected
+
+SQL> --consider a table employee with columns ename,city?
+SQL> --maintain all the data in upper case?
+SQL> 
+SQL> create table employee
+  2  (
+  3  ename  varchar2(20),
+  4  city    varchar2(20)
+  5  );
+
+Table created.
+
+SQL> create or replace trigger trig_upper
+  2  before insert or update
+  3  on employee
+  4  for each row
+  5  begin
+  6  :new.ename:=upper(:new.ename);
+  7  :new.city:=upper(:new.city);
+  8  end trig_upper;
+  9  /
+
+Trigger created.
+
+SQL> insert into employee values('ajay','delhi');
+
+1 row created.
+
+SQL> insert into employee values('VIjay','chennai');
+
+1 row created.
+
+SQL> insert into employee values('kiran','HYD');
+
+1 row created.
+
+SQL> insert into employee values('jack','KENya');
+
+1 row created.
+
+SQL> select * from employee;
+
+ENAME                CITY                                                       
+-------------------- --------------------                                       
+AJAY                 DELHI                                                      
+VIJAY                CHENNAI                                                    
+KIRAN                HYD                                                        
+JACK                 KENYA                                                      
+
+SQL> create table audit_new_emp
+  2  (
+  3  ename  varchar2(20),
+  4  city   varchar2(20),
+  5  regdt   date   default  sysdate,
+  6  status   varchar2(20) default 'REGISTERED'
+  7  );
+
+Table created.
+
+SQL> 
+SQL> create or replace trigger trig_new
+  2  before insert on employee
+  3  for each row
+  4  begin
+  5  insert into audit_new_emp(ename,city)
+  6  values(:new.ename,:new.city);
+  7  end trig_new;
+  8  /
+
+Trigger created.
+
+SQL> cl scr;
+
+SQL> select * from employee;
+
+ENAME                CITY                                                       
+-------------------- --------------------                                       
+AJAY                 DELHI                                                      
+VIJAY                CHENNAI                                                    
+KIRAN                HYD                                                        
+JACK                 KENYA                                                      
+
+SQL> select * from audit_new_emp;
+
+no rows selected
+
+SQL> insert into employee values('a','hyd');
+
+1 row created.
+
+SQL> insert into employee values('B','hyd');
+
+1 row created.
+
+SQL> insert into employee values('c','hyd');
+
+1 row created.
+
+SQL> select * from employee;
+
+ENAME                CITY                                                       
+-------------------- --------------------                                       
+AJAY                 DELHI                                                      
+VIJAY                CHENNAI                                                    
+KIRAN                HYD                                                        
+JACK                 KENYA                                                      
+A                    HYD                                                        
+B                    HYD                                                        
+C                    HYD                                                        
+
+7 rows selected.
+
+SQL> select * from audit_new_emp;
+
+ENAME                CITY                 REGDT     STATUS                      
+-------------------- -------------------- --------- --------------------        
+a                    hyd                  13-MAR-19 REGISTERED                  
+B                    hyd                  13-MAR-19 REGISTERED                  
+c                    hyd                  13-MAR-19 REGISTERED                  
+
+SQL> spool off;

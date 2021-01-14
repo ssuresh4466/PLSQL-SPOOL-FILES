@@ -1,0 +1,241 @@
+SQL> 
+SQL> --write a procedure to display emp records from given deptno?
+SQL> 
+SQL> 
+SQL> 	create or replace procedure proc_emp_dtls_dno
+  2  	(vdno emp.deptno%type)
+  3  	is
+  4  	cursor   empcur
+  5  	is
+  6  	select * from emp
+  7  	where deptno=vdno;
+  8  	vrec   emp%rowtype;
+  9  	begin
+ 10  	open      empcur;
+ 11  	dbms_output.put_line
+ 12  	(' Details of emps from the deptno:       '||vdno||chr(10)||
+ 13  	'--------------------------------------------------------');
+ 14  	loop
+ 15  	fetch empcur into vrec;
+ 16  	exit when empcur%notfound;
+ 17  	dbms_output.put_line
+ 18  	(chr(10)||
+ 19          vrec.empno||' ; '||vrec.ename||';'||vrec.sal||';'||
+ 20  	vrec.job||';'||vrec.hiredate||';'||vrec.deptno);
+ 21  	end loop;
+ 22  	dbms_output.put_line
+ 23  	(chr(10)||'Number of emps Selected :       '||empcur%rowcount);
+ 24  	close empcur;
+ 25  	end proc_emp_dtls_dno;
+ 26  /
+
+Procedure created.
+
+SQL> exec proc_emp_dtls_dno(10);
+Details of emps from the deptno:       10
+--------------------------------------------------------                                                                                                                                    
+
+7782 ; CLARK;2450;MANAGER;09-JUN-81;10                                                                                                                                                                                               
+
+7839 ; KING;5000;PRESIDENT;17-NOV-81;10                                                                                                                                                                                              
+
+7934 ; MILLER;1300;CLERK;23-JAN-82;10                                                                                                                                                                                                
+
+Number of emps Selected :       3                                                                                                                                                                                                    
+
+PL/SQL procedure successfully completed.
+
+SQL> ed
+Wrote file afiedt.buf
+
+  1  	create or replace procedure proc_emp_dtls_dno
+  2  	(vdno emp.deptno%type)
+  3  	is
+  4  	cursor   empcur
+  5  	is
+  6  	select * from emp
+  7  	where deptno=vdno;
+  8  	vrec   emp%rowtype;
+  9  	begin
+ 10  	open      empcur;
+ 11  	dbms_output.put_line
+ 12  	(' Details of emps from the deptno:       '||vdno||chr(10)||
+ 13  	'--------------------------------------------------------');
+ 14  	loop
+ 15  	fetch empcur into vrec;
+ 16  	exit when empcur%notfound;
+ 17  	dbms_output.put_line
+ 18  	(chr(10)||
+ 19          vrec.empno||' ; '||vrec.ename||';'||vrec.sal||';'||
+ 20  	vrec.job||';'||vrec.hiredate||';'||vrec.deptno);
+ 21  	end loop;
+ 22  	dbms_output.put_line('-----------------------------------------------');
+ 23  	dbms_output.put_line
+ 24  	(chr(10)||'Number of emps Selected :       '||empcur%rowcount);
+ 25  	close empcur;
+ 26* 	end proc_emp_dtls_dno;
+SQL> /
+
+Procedure created.
+
+SQL> exec proc_emp_dtls_dno(20);
+Details of emps from the deptno:       20
+--------------------------------------------------------                                                                                                                                    
+
+7369 ; SMITH;800;CLERK;17-DEC-80;20                                                                                                                                                                                                  
+
+7566 ; JONES;2975;MANAGER;02-APR-81;20                                                                                                                                                                                               
+
+7788 ; SCOTT;3000;ANALYST;19-APR-87;20                                                                                                                                                                                               
+
+7876 ; ADAMS;1100;CLERK;23-MAY-87;20                                                                                                                                                                                                 
+
+7902 ; FORD;3000;ANALYST;03-DEC-81;20                                                                                                                                                                                                
+-----------------------------------------------                                                                                                                                                                                       
+
+Number of emps Selected :       5                                                                                                                                                                                                    
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_emp_dtls_dno(30);
+Details of emps from the deptno:       30
+--------------------------------------------------------                                                                                                                                    
+
+7499 ; ALLEN;1600;SALESMAN;20-FEB-81;30                                                                                                                                                                                              
+
+7521 ; WARD;1250;SALESMAN;22-FEB-81;30                                                                                                                                                                                               
+
+7654 ; MARTIN;1250;SALESMAN;28-SEP-81;30                                                                                                                                                                                             
+
+7698 ; BLAKE;2850;MANAGER;01-MAY-81;30                                                                                                                                                                                               
+
+7844 ; TURNER;1500;SALESMAN;08-SEP-81;30                                                                                                                                                                                             
+
+7900 ; JAMES;950;CLERK;03-DEC-81;30                                                                                                                                                                                                  
+-----------------------------------------------                                                                                                                                                                                       
+
+Number of emps Selected :       6                                                                                                                                                                                                    
+
+PL/SQL procedure successfully completed.
+
+SQL> --write procedure to display employee details from given dept name?
+SQL> 
+SQL> create or replace procedure proc_emp_info
+  2  (vdname in dept.dname%type)
+  3  is
+  4  CURSOR  emp_cur
+  5  is
+  6  select * from emp
+  7  where deptno=
+  8  (
+  9  select deptno from dept
+ 10  where dname=vdname
+ 11  );
+ 12  vrec  emp%rowtype;
+ 13  begin
+ 14  open emp_cur;
+ 15  dbms_output.put_line
+ 16  (' given dept name:   '||vdname);
+ 17  dbms_output.put_line
+ 18  ('----------------------------------------------------------------------------');
+ 19  dbms_output.put_line
+ 20  ('empid	empname        sal        job        hiredate        comm       deptno');
+ 21  dbms_output.put_line
+ 22  ('--------------------------------------------------------------------------------------');
+ 23  loop
+ 24  fetch emp_cur into vrec;
+ 25  exit when emp_cur%notfound;
+ 26  dbms_output.put_line
+ 27  (vrec.empno||'     '||vrec.ename||'      '||vrec.sal||'   '||vrec.job||
+ 28  '     '||vrec.hiredate||'     '||vrec.comm||'     '||vrec.deptno);
+ 29  end loop;
+ 30  dbms_output.put_line
+ 31  (chr(10)||
+ 32  'Number of emps selected:   '||emp_cur%rowcount);
+ 33  close emp_cur;
+ 34  end proc_emp_info;
+ 35  /
+
+Procedure created.
+
+SQL> exec proc_emp_info('ACCOUNTING');
+given dept name:   ACCOUNTING                                                                                                                                                                                                         
+----------------------------------------------------------------------------                                                                                                                                                          
+empid	empname        sal        job        hiredate        comm       deptno                                                                                                                                                          
+--------------------------------------------------------------------------------------                                                                                                                                                
+7782     CLARK      2450   MANAGER     09-JUN-81          10                                                                                                                                                                          
+7839     KING      5000   PRESIDENT     17-NOV-81          10                                                                                                                                                                         
+7934     MILLER      1300   CLERK     23-JAN-82          10                                                                                                                                                                           
+
+Number of emps selected:   3                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> exec proc_emp_info('RESEARCH');
+given dept name:   RESEARCH                                                                                                                                                                                                           
+----------------------------------------------------------------------------                                                                                                                                                          
+empid	empname        sal        job        hiredate        comm       deptno                                                                                                                                                          
+--------------------------------------------------------------------------------------                                                                                                                                                
+7369     SMITH      800   CLERK     17-DEC-80          20                                                                                                                                                                             
+7566     JONES      2975   MANAGER     02-APR-81          20                                                                                                                                                                          
+7788     SCOTT      3000   ANALYST     19-APR-87          20                                                                                                                                                                          
+7876     ADAMS      1100   CLERK     23-MAY-87          20                                                                                                                                                                            
+7902     FORD      3000   ANALYST     03-DEC-81          20                                                                                                                                                                           
+
+Number of emps selected:   5                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> ED
+Wrote file afiedt.buf
+
+  1  --Ex:	
+  2  --write a procedure to display the employee details along with 
+  3  --dept info from given deptno?
+  4  	/* Procedure with Explicit Cursor */
+  5  create or replace procedure proc_emp_dept_dtls_dno 
+  6  (vdno  IN emp.deptno%type)
+  7  is
+  8  cursor    c 
+  9  is 
+ 10  select e.empno,e.ename,e.sal,e.job,d.* 
+ 11  from emp e, dept d
+ 12   where e.deptno=vdno 
+ 13  and 
+ 14  e.deptno=d.deptno;
+ 15  /* DECLARING CURSOR BASED RECORD type variable, Which SUPPORTS ALL COLUMNS FROM THE CURSOR */
+ 16  /* IT IS REQUIRED IF WE ARE SELECTING DATA FROM MULTIPLE TABLES IN TO THE CURSOR	*/
+ 17  /* Declaring Cursor type variable-->         varname    cur_name%rowtype;         */
+ 18  	vrec   c%rowtype;  
+ 19  	begin
+ 20  	open c;
+ 21  	dbms_output.put_line
+ 22  	(' Details of emps under the deptno: '||vdno||chr(10)||
+ 23  	' ----------------------------------------------------');
+ 24  	loop
+ 25  	fetch c into vrec;
+ 26  	exit when c%notfound;
+ 27  	dbms_output.put_line
+ 28  	(vrec.empno||' ; '||vrec.ename||' ; '||vrec.sal||' ; '||
+ 29  	vrec.job||' ; '||vrec.deptno||' ; '||vrec.dname||' ; '||
+ 30  	vrec.loc); 
+ 31  	end loop;
+ 32  	close c;
+ 33* 	end proc_emp_dept_dtls_dno;
+ 34  /
+
+Procedure created.
+
+SQL> EXEC PROC_EMP_DEPT_DTLS_DNO(30);
+Details of emps under the deptno: 30
+ ----------------------------------------------------                                                                                                                                            
+7499 ; ALLEN ; 1600 ; SALESMAN ; 30 ; SALES ; CHICAGO                                                                                                                                                                                 
+7521 ; WARD ; 1250 ; SALESMAN ; 30 ; SALES ; CHICAGO                                                                                                                                                                                  
+7654 ; MARTIN ; 1250 ; SALESMAN ; 30 ; SALES ; CHICAGO                                                                                                                                                                                
+7698 ; BLAKE ; 2850 ; MANAGER ; 30 ; SALES ; CHICAGO                                                                                                                                                                                  
+7844 ; TURNER ; 1500 ; SALESMAN ; 30 ; SALES ; CHICAGO                                                                                                                                                                                
+7900 ; JAMES ; 950 ; CLERK ; 30 ; SALES ; CHICAGO                                                                                                                                                                                     
+
+PL/SQL procedure successfully completed.
+
+SQL> spool off;

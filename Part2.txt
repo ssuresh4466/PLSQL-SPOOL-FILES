@@ -1,0 +1,401 @@
+Ex: write a program to display customer account details for the 
+given customer name?
+
+declare
+vcname  varchar2(20);
+vactno  number(12);
+vacttype  varchar2(10);
+vopendate date;
+vactbal  number;
+vccode  varchar2(10);
+begin
+vcname:='&vcname';
+select actno,act_type,act_open_date,act_bal,cust_code 
+	into 
+       vactno,vacttype,vopendate,vactbal,vccode
+       from cust_act_dtls
+       where cno =(select cno from cust_dtls where cname=vcname);
+       
+dbms_output.put_line('Account details of  '||upper(vcname));
+dbms_output.put_line('*************************************');
+dbms_output.put_line('Account Number='||vactno);
+dbms_output.put_line('Account Type='||vacttype);
+dbms_output.put_line('Account Open Date='||vopendate);
+dbms_output.put_line('Account Balance='||vactbal);
+dbms_output.put_line('Customer Code='||vccode);
+end;
+
+Note:
+
+Generally, we need to declare a variable with column data 
+type otherwise we will get compatibility issues.
+
+To store a complete record in to a variable we need declare a 
+variable as TABLE BASED RECORD type variable.
+
+
+--------------------------------------------------------------------------------------
+
+
+TYPE COMPATIBILITY KEYWORD:-   %TYPE
+*************************************
+we can declare the variables dynamically/ Implicitly 
+with data type of column, by using %TYPE.
+It eleminates Data type and size incompatibility issues.
+
+syn:	
+    var       table_name.col_name%TYPE;
+
+Ex:	vdno	emp.deptno%type;
+
+In the above the %TYPE is taking the data type and size of the 
+column DEPTNO from the table EMP and these things will be 
+applicable to the varaible "vdno".
+
+Ex:	
+vacctno		cust_act_dtls.actno%type;	
+--------------------------------------------------------------------------------------
+
+%ROWTYPE 
+********
+It is used to declare a variable as a RECORD type variable.
+This type of variable is able to store one record from one table.
+It is reducing number of variable declarations.
+
+syn:	
+   varname        tablename%ROWTYPE;
+
+Ex:	emp_rec	   emp%rowtype;
+
+Ex:	prod_info    prod_dtls%rowtype;
+
+		emp_rec
+		  |
+----------------------------------------------------------------------------------
+|	|		|		|		|		|	|
+empno	ename		sal		job		hiredate	comm	deptno
+
+
+SAVE A RECORD IN TO COMPOSITE VARIABLE:-	
+
+Ex:	
+select * into emp_rec from emp where empno=7788;
+
+
+How to ACCESS individual values from COMPOSITE TYPE variable?
+
+syn:	IN  any output stmt,use the below syntax
+
+	var_name . colname;
+
+Ex:	dbms_output.put_line
+	(' emp salary :'|| emp_rec . sal);
+
+Ex:-
+-->Don't specify like this	
+dbms_output.put_line(' emp Info :'|| emp_rec );
+
+
+------------------------------------------------------------------------------------------
+
+
+Ex: 
+Write a program to display the information of employee for 
+the given employee id?
+
+	declare
+	--Dynamic declaration of variable
+	veno   emp.empno%type;
+	--Declaring table based record type variable 
+	emprec   emp%rowtype;	
+	begin
+	veno:='&veno';
+	select * into emprec from emp
+	where empno=veno;
+	dbms_output.put_line
+	(chr(10)||' Emp id:  '||veno||chr(10)||
+         '****************************'||chr(10)||
+         'Name: '||emprec.ename||chr(10)||
+         'Desg: '||emprec.job||chr(10)||
+         'Salary: '||emprec.sal||chr(10)||
+         'Join Dt: '||emprec.hiredate||chr(10)||
+         'Comm:   '||emprec.comm||chr(10)||
+         'Deptno:  '||emprec.deptno||chr(10)||
+         'Working under manager_Id:   '||emprec.mgr
+        );
+        end;
+
+	
+-------------------------------------------------------------------------------------------------
+
+Ex:	
+write a program to display the information of product for 
+the given product id?
+
+	declare
+	vprodid   prod_dtls.prod_code%type;
+	p_rec  prod_dtls%rowtype;
+					
+	begin
+	vprodid:='&vrodpid';
+	select * into p_rec 
+	from prod_dtls 
+	where prod_code=vprodid;
+	dbms_output.put_line
+	(' Information of prodid: '||vprodid);
+	dbms_output.put_line
+	(chr(10)||'prod name:   '||p_rec.prod_name||'	'||
+	'Price:   '||p_rec.cost||'	'||
+	'Mfg date:  '||p_rec.mfg||'	'||
+	'Warrenty:   '||p_rec.warrenty||' '||
+	'company code:   '||p_rec.comp_code);
+	end;
+
+-------------------------------------------------------------------------------------------------
+
+					
+eX:	
+write a program to display the information of a customer for 
+the given customer number?
+
+	declare
+	vcustid	cust_dtls.custid%type;
+	cust_rec	cust_dtls%rowtype;
+	begin
+	vcustid:='&vcustid';
+	select * into cust_rec from cust_dtls 
+	where custid=vcustid;
+	dbms_output.put_line
+	(' Given customer ID: '||vcustid);
+	dbms_output.put_line
+	(' customer name= '||cust_rec.custname);	
+	dbms_output.put_line
+	(' customer city= '||cust_rec.custcity);
+	dbms_output.put_line
+	(' customer gender= '||cust_rec.custgender);
+	dbms_output.put_line
+	(' customer mobile number= '||cust_rec.custmobile);
+	end;
+
+--------------------------------------------------------------------------------------------------------
+
+
+declare
+	vcustid	customers_br1.cid%type;
+	cust_rec	customers_br1%rowtype;
+	begin
+	vcustid:='&vcustid';
+	select * into cust_rec from customers_br1 where cid=vcustid;
+/*	dbms_output.put_line(' given customer id: '||vcustid);
+	dbms_output.put_line(' customer name='||cust_rec.cname);	
+	dbms_output.put_line(' customer city='||cust_rec.city);
+	dbms_output.put_line(' customer gender='||cust_rec.gender);
+	dbms_output.put_line(' customer mobile number='||cust_rec.mobile); */
+  dbms_output.put_line('GIVEN ID:'||vcustid);
+  dbms_output.put_line('--------------------------------------------------------------');
+  dbms_output.put_line('NAME        CITY          GENDER          MOBILE-NUMBER'       );
+  dbms_output.put_line('---------------------------------------------------------------');
+  dbms_output.put_line(cust_rec.cname||'     '||cust_rec.city||'      '||cust_rec.gender||'     '||cust_rec.mobile);
+	end;
+--------------------------------------------------------------------------
+
+%ROWTYPE drawbacks:
+===================
+i) Unnecessarily reserving more memory.
+ii) It is not supporting multiple columns from
+    multiple tables.
+---------------------------------------------------------------------------
+
+
+
+USER DEFINED RECORD TYPE
+========================
+This record structure can be defined based on required columns
+from a table or multiple tables.
+This structure is defined by using the keyword "TYPE".
+
+a) Define a structure for record.
+   This structure having multiple columns from 
+   multiple tables.
+
+TYPE  <type_name> IS RECORD
+(
+colname	datatype(size),
+colname	datatype(size),	
+colname	datatype(size),
+---
+---
+);
+
+
+b) Declare a variable with above type.	
+   Then this variable supports / store a record composed with 
+   above columns.
+
+SYN:
+var	<type_name>;
+
+
+c) How to access values from above variable?
+
+	var_name.structure_colname
+
+Note: 
+In the above syntax the colname should be same as a colname 
+from record structure
+	[ i.e. Not a colname from table ].
+
+
+
+Req:
+program to display customer name, city, actno,balance, 
+act_name from given customer number?
+
+DECLARE
+TYPE  cust_type IS RECORD
+(
+custname  cust_dtls.cname%type,
+custcity  cust_dtls.city%type,
+Actno     cust_act_dtls.actno%type,
+actbal    NUMBER,
+actname   act_types.act_name%type
+);
+v_cust_rec   cust_type;
+vcid    cust_dtls.cno%type;
+begin
+VCID:='&VCID';
+select 
+cd.cname,cd.city,cad.actno,cad.act_bal,at.act_name
+ into
+ v_cust_rec
+from cust_dtls cd,cust_act_dtls cad,act_types at
+where cd.cno=vcid
+and
+(
+cd.cno=cad.cno
+and
+cad.act_type=at.act_type
+);
+
+dbms_output.put_line(chr(10)||
+'  Given customer Id:   '||vcid||chr(10)||
+'________________________________'||chr(10)||
+' Name:     '||v_cust_rec.custname||chr(10)||
+' City:        '||v_cust_rec.custcity||chr(10)||
+' Actname: '||v_cust_rec.actname||chr(10)||
+' Actno:      '||v_cust_rec.actno||chr(10)||
+' Bal:          '||v_cust_rec.actbal
+);
+end ;
+
+
+declare
+	
+	vname varchar2(20);
+	vsal number(5);
+	vjob varchar2(20);
+	vjdate date;
+	vcomm varchar2(10);
+	vdeptno number(3);
+	BEGIN
+	select ename,sal,job,hiredate,nvl(to_char(comm),'N/A'),deptno INTO
+		vname,vsal,vjob,vjdate,vcomm,vdeptno
+	from emp
+	where empno=7521;
+	dbms_output.put_line(' Info of 7521');
+	dbms_output.put_line('---------------');	
+	dbms_output.put_line('Empname: '||vname);
+	dbms_output.put_line('Sal: '||vsal);
+	dbms_output.put_line('Desg: '||vjob);
+	dbms_output.put_line('Joined Date: '||vjdate);
+	dbms_output.put_line('comm: '||vcomm);
+	dbms_output.put_line('Working under deptno: '||vdeptno);
+	END;
+	/
+
+Ex:
+
+declare
+vname  varchar2(10);
+vcost  number(7);
+vmfg   date;
+vwarr  varchar2(20);
+vcmp   varchar2(10);
+begin
+select prod_name,cost,mfg,warrenty,comp_code
+              into
+         vname,vcost,vmfg,vwarr,vcmp
+from prod_dtls
+where prod_code='DMBLY';
+dbms_output.put_line
+(' Prod code: DMBLY');
+dbms_output.put_line
+('--------------------');
+dbms_output.put_line
+('Name: '||vname);
+dbms_output.put_line
+('cost: '||vcost);
+dbms_output.put_line
+(' Mfg Date: '||vmfg);
+dbms_output.put_line
+(' Warrenty:  '||vwarr);
+dbms_output.put_line
+('Comp Code: '||vcmp);
+end;
+
+
+
+Ex:
+declare
+vcname  varchar2(20);
+vactname varchar2(20);
+vbal  number(6);
+begin
+select cd.cname,at.act_name,cad.act_bal
+         into
+       vcname,vactname,vbal
+from cust_dtls cd, cust_act_dtls cad, act_types at
+where cd.cno='cust-2'
+and
+( cd.cno=cad.cno  and cad.act_type=at.act_type);
+dbms_output.put_line
+(chr(10)||
+'Customer Account Information: cust-2'||chr(10)||
+'**************************************'||chr(10)||
+'Customer Name: '||vcname||chr(10)||
+'Account Name:  '||vactname||chr(10)||
+'Balance:       '||vbal||chr(10)||
+'----------------------------------------'
+);
+end;
+
+Ex:
+declare
+TYPE  prod_type  IS RECORD
+(
+prodname  prod_dtls.prod_name%type,
+prodcost    prod_dtls.cost%type,
+prodwarr   prod_dtls.warrenty%type,
+compname comp_dtls.comp_name%type
+);
+prodrec  prod_type;
+vpid  prod_dtls.prod_code%type;
+begin
+vpid:='&vpid';
+select p.prod_name,p.cost,p.warrenty,
+          c.comp_name
+into  prodrec
+from prod_dtls p, comp_dtls c
+where p.prod_code=vpid
+and  p.comp_code=c.comp_code;
+dbms_output.put_line
+(chr(10)||
+' Given prod code:  '||vpid||chr(10)||
+'Name:  '||prodrec.prodname||chr(10)||
+'Cost:  '||prodrec.prodcost||chr(10)||
+'Warr: '||prodrec.prodwarr||chr(10)||
+'Comp name:  '||prodrec.compname
+);
+end;
+	
+=========================================================================================

@@ -1,0 +1,89 @@
+SQL> 
+SQL> --> write a program to display welcome to plsql message?
+SQL> 
+SQL> BEGIN
+  2  DBMS_OUTPUT.PUT_LINE('WELCOME TO PLSQL PROGRAMMING');
+  3  END;
+  4  /
+
+PL/SQL procedure successfully completed.
+
+SQL> SET SERVEROUTPUT ON;
+SQL> /
+WELCOME TO PLSQL PROGRAMMING                                                    
+
+PL/SQL procedure successfully completed.
+
+SQL> --> write a program to display total salary paying to all emps?
+SQL> 
+SQL> DECLARE
+  2  VTOTAL  number;
+  3  BEGIN
+  4  select sum(sal) INTO vtotal
+  5  from emp;
+  6  dbms_output.put_line(' Total Salary:  ');
+  7  dbms_output.put_line(vtotal);
+  8  END;
+  9  /
+Total Salary:                                                                   
+29025                                                                           
+
+PL/SQL procedure successfully completed.
+
+SQL> ed
+Wrote file afiedt.buf
+
+  1  DECLARE
+  2  VTOTAL  number;
+  3  BEGIN
+  4  select sum(sal) INTO vtotal
+  5  from emp;
+  6  dbms_output.put_line(' Total Salary:  '||vtotal);
+  7  --dbms_output.put_line(vtotal);
+  8* END;
+SQL> /
+Total Salary:  29025                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> --> write a program to display empname,sal, desg of emp id 7788?
+SQL> 
+SQL> DECLARE
+  2  vname  varchar2(10);
+  3  vsal   number(5);
+  4  vdesg  varchar2(10);
+  5  BEGIN
+  6  select ename,sal,job into vname,vsal,vdesg
+  7  from emp
+  8  where empno=7788;
+  9  dbms_output.put_line(' Empid:  7788');
+ 10  dbms_output.put_line(' Emp Name:  '||vname);
+ 11  dbms_output.put_line(' Emp salary:  '||vsal);
+ 12  dbms_output.put_line(' Working as:  '||vdesg);
+ 13  end;
+ 14  /
+Empid:  7788                                                                    
+Emp Name:  SCOTT                                                                
+Emp salary:  3000                                                               
+Working as:  ANALYST                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> /
+Empid:  7788                                                                    
+Emp Name:  SCOTT                                                                
+Emp salary:  3000                                                               
+Working as:  ANALYST                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> /
+Empid:  7788                                                                    
+Emp Name:  SCOTT                                                                
+Emp salary:  3000                                                               
+Working as:  ANALYST                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> spool off;

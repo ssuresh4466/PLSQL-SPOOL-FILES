@@ -1,0 +1,181 @@
+SQL> 
+SQL> --get all procedures and functions from current user account?
+SQL> 
+SQL> select object_name from user_procedures;
+
+OBJECT_NAME                                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------------------------------------                                                                                                      
+PROC_EMP_DTLS_DNO                                                                                                                                                                                                                     
+PROC_UPDATE                                                                                                                                                                                                                           
+PROC_EMP_INFO                                                                                                                                                                                                                         
+PROC_EMP_DEPT_DTLS_DNO                                                                                                                                                                                                                
+FIND_SALARY                                                                                                                                                                                                                           
+F_ADD                                                                                                                                                                                                                                 
+FUNC_BONUS                                                                                                                                                                                                                            
+PROC_EMP_FSAL                                                                                                                                                                                                                         
+PROC_EMPS_FSAL                                                                                                                                                                                                                        
+PROC_EMPS_FSAL_JOB                                                                                                                                                                                                                    
+GET_TOTALSAL_AVGSAL                                                                                                                                                                                                                   
+
+OBJECT_NAME                                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------------------------------------                                                                                                      
+GET_CUST_ACT_INFO                                                                                                                                                                                                                     
+GET_CUST_ACT_INFO_CID                                                                                                                                                                                                                 
+GET_INVESTMENT                                                                                                                                                                                                                        
+GET_CUST_INFO                                                                                                                                                                                                                         
+PROC_CMP_SAL                                                                                                                                                                                                                          
+PROC_GENDER_CNT                                                                                                                                                                                                                       
+PROC_BILLAMOUNT                                                                                                                                                                                                                       
+PROC_EVEN                                                                                                                                                                                                                             
+PROC_SEQNOS                                                                                                                                                                                                                           
+PROC_CIRCLE_AREA                                                                                                                                                                                                                      
+PROC_REVNO                                                                                                                                                                                                                            
+
+OBJECT_NAME                                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------------------------------------                                                                                                      
+PROC_DEPT_RECORDS                                                                                                                                                                                                                     
+BILLAMOUNT                                                                                                                                                                                                                            
+PROC_ENAME                                                                                                                                                                                                                            
+PROC_EXCEP                                                                                                                                                                                                                            
+PROC_CUST_ACT_DTLS                                                                                                                                                                                                                    
+PROC_EMP_COMM                                                                                                                                                                                                                         
+PROC_COMP_DEL                                                                                                                                                                                                                         
+PROC_DEPOSIT                                                                                                                                                                                                                          
+
+30 rows selected.
+
+SQL> exec proc_emp_fsal(7654);
+The salary details of  7654                                                                                                                                                                                                           
+----------------------------------------------------                                                                                                                                                                                  
+empid    salary      bonus     final salary                                                                                                                                                                                           
+7654     1250        62.5       1312.5                                                                                                                                                                                                
+
+PL/SQL procedure successfully completed.
+
+SQL> CREATE OR REPLACE PACKAGE emppkg
+  2  	 AS
+  3  	PROCEDURE PROC_EMP_FSAL
+  4  	(VENO EMP.EMPNO%TYPE);
+  5  	PROCEDURE PROC_EMPs_Fsal;
+  6  	PROCEDURE PROC_EMPs_FSAL_JOB
+  7  	(vjob emp.job%type);
+  8  	FUNCTION  FUNC_bonus(S EMP.SAL%TYPE)
+  9  	RETURN NUMBER;
+ 10  	END emppkg;
+ 11  /
+
+Package created.
+
+SQL> 	CREATE OR REPLACE PACKAGE BODY emppkg
+  2  	IS
+  3  
+  4  	/* PROC_EMP_FSAL  */
+  5  
+  6  	Procedure proc_emp_fsal(veno emp.empno%type)
+  7  	is
+  8  	vsal emp.sal%type;
+  9  	b number(7,2);
+ 10  	fsal number(7,2);
+ 11  	begin
+ 12  	select sal into vsal from emp where empno=veno;
+ 13  	b:=func_bonus(vsal); /* function calling stmt */
+ 14  	fsal:=vsal+b;
+ 15  	dbms_output.put_line(' The salary details of  '||veno);
+ 16  	dbms_output.put_line('----------------------------------------------------');
+ 17  	dbms_output.put_line('salary       bonus        final salary');
+ 18  	dbms_output.put_line(  vsal||'       '||b||'        '||fsal);
+ 19  	end proc_emp_fsal;
+ 20  
+ 21  
+ 22  	/* function to calcualte the BONUS */
+ 23  
+ 24  	Function func_bonus(s emp.sal%type)
+ 25  	return number
+ 26  	is
+ 27  	bonus number(7,2);
+ 28  	begin
+ 29  	if (s<1000) then
+ 30  	bonus:=0.02*s;
+ 31  	end if;
+ 32  	if (s>=1000 and s<2000) then
+ 33  	bonus:=0.05*s;
+ 34  	end if;
+ 35  	if (s>=2000 and s<3000) then
+ 36  	bonus:=0.10*s;
+ 37  	end if;
+ 38  	if (s>=3000 and s<5000) then
+ 39  	bonus:=0.20*s;
+ 40  	end if;
+ 41  	if (s>=5000) then
+ 42  	bonus:=0.25*s;
+ 43  	end if;
+ 44  	return(bonus);
+ 45  	end func_bonus;
+ 46  
+ 47  	/* Procedure to display the sal info of all emps */
+ 48  
+ 49  	Procedure proc_emps_fsal
+ 50  	is
+ 51  	cursor c is select empno,sal from emp;
+ 52  	veno emp.empno%type;
+ 53  	vsal emp.sal%type;
+ 54  	b number(7,2);
+ 55  	fsal number(7,2);
+ 56  	begin
+ 57  	open c;
+ 58  
+ 59  	dbms_output.put_line
+ 60  ('----------------------------------------------------');
+ 61  	dbms_output.put_line
+ 62  ('salary        bonus        final salary');
+ 63  	dbms_output.put_line
+ 64  ('*************************************************');
+ 65  	loop
+ 66  	fetch c into veno,vsal;
+ 67  	dbms_output.put_line(' The salary details of  '||veno);
+ 68  	b:=func_bonus(vsal); /* function calling stmt */
+ 69  	fsal:=vsal+b;
+ 70  	EXIT WHEN (C%NOTFOUND);
+ 71  	dbms_output.put_line(vsal||'       '||b||'         '||fsal);
+ 72  	END LOOP;
+ 73  	CLOSE C;
+ 74  	end proc_emps_fsal;
+ 75  
+ 76  
+ 77  		/* procedure  proc_emps_fsal_job  */
+ 78  
+ 79  	procedure proc_emps_fsal_job(vjob emp.job%type)  is
+ 80  	cursor c is select empno,sal from emp where job=vjob;
+ 81    	vsal emp.sal%type;
+ 82  	veno emp.empno%type;
+ 83  	incrval number(7,2);
+ 84  	fsal number(7,2);
+ 85  	begin
+ 86  	open c;
+ 87  	loop
+ 88  	fetch c into veno,vsal;
+ 89  	incrval:=func_bonus(vsal);  /* function calling stmt  */
+ 90  	fsal:=vsal+incrval;
+ 91  	EXIT WHEN c%NOTFOUND;
+ 92  	dbms_output.put_line(' sal,incrval,final salary of  '||veno);
+ 93  	dbms_output.put_line(vsal||' , '||incrval||' , '||fsal);
+ 94  	end loop;
+ 95  	close c;
+ 96  	end proc_emps_fsal_job;
+ 97  
+ 98  	END emppkg;
+ 99  /
+
+Package body created.
+
+SQL> --How to execute a procedure from package?
+SQL> 
+SQL> exec emppkg.proc_emp_fsal(7654);
+The salary details of  7654                                                                                                                                                                                                           
+----------------------------------------------------                                                                                                                                                                                  
+salary       bonus        final salary                                                                                                                                                                                                
+1250       62.5        1312.5                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> spool off;

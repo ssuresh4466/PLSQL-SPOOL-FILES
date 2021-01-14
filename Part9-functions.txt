@@ -1,0 +1,248 @@
+SQL> 
+SQL> --write a function to add 2 given integers?
+SQL> 
+SQL> create or replace function f_add(a int,b int)
+  2  RETURN int
+  3  is
+  4  vtotal   int;
+  5  begin
+  6  vtotal:=a+b;
+  7  RETURN(vtotal);
+  8  end f_add;
+  9  /
+
+Function created.
+
+SQL> 
+SQL> select f_add(230,450) total from dual;
+
+     TOTAL                                                                                                                                                                                                                            
+----------                                                                                                                                                                                                                            
+       680                                                                                                                                                                                                                            
+
+SQL> select 680 total from dual;
+
+     TOTAL                                                                                                                                                                                                                            
+----------                                                                                                                                                                                                                            
+       680                                                                                                                                                                                                                            
+
+SQL> --> write a function to return salary of emp  from given empid?
+SQL> 
+SQL> create or replace function find_salary(vempid  emp.empno%type)
+  2  return number
+  3  is
+  4  vsalary  number;
+  5  begin
+  6  select sal into vsalary from emp where empno=vempid;
+  7  return(vsalary);
+  8  end find_salary;
+  9  /
+
+Function created.
+
+SQL> declare
+  2  veid  emp.empno%type;
+  3  vsal  number;
+  4  begin
+  5  veid:=&veid;
+  6  vsal:=find_salary(veid);
+  7  dbms_output.put_line
+  8  (chr(10)||' empid:  '||veid||'   salary:  '||vsal);
+  9  end;
+ 10  /
+Enter value for veid: 7654
+old   5: veid:=&veid;
+new   5: veid:=7654;
+
+ empid:  7654   salary:  1250                                                                                                                                                                                                        
+
+PL/SQL procedure successfully completed.
+
+SQL> /
+Enter value for veid: 7788
+old   5: veid:=&veid;
+new   5: veid:=7788;
+
+ empid:  7788   salary:  3000                                                                                                                                                                                                        
+
+PL/SQL procedure successfully completed.
+
+SQL> /
+Enter value for veid: 7369
+old   5: veid:=&veid;
+new   5: veid:=7369;
+
+ empid:  7369   salary:  800                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> --write a function to calculate bonus based on salary ranges?
+SQL> 
+SQL> 
+SQL> 	create or replace function func_bonus
+  2  	(s IN  emp.sal%type)
+  3  	return    number
+  4  	is
+  5  	vbonus    number(7,2);
+  6  	begin
+  7  	if (s <1000) then
+  8  	vbonus:=0.02*s;
+  9  	elsif (s>=1000 and s<2000) then
+ 10  	vbonus:=0.05*s;
+ 11  	elsif (s>=2000 and s<3000) then
+ 12  	vbonus:=0.10*s;
+ 13  	elsif (s>=3000 and s<5000) then
+ 14  	vbonus:=0.20*s;
+ 15  	else
+ 16  	vbonus:=0.25*s;
+ 17  	end if;
+ 18  	return(vbonus);
+ 19  	end func_bonus;
+ 20  /
+
+Function created.
+
+SQL> select func_bonus(4500) bonus from dual;
+
+     BONUS                                                                                                                                                                                                                            
+----------                                                                                                                                                                                                                            
+       900                                                                                                                                                                                                                            
+
+SQL> 
+SQL> --Procedure to display empid,salary, bonus and total salary for
+SQL> --given empid?
+SQL> 
+SQL> 	create or replace procedure proc_emp_fsal
+  2  	(veno IN emp.empno%type)
+  3  	is
+  4  	vsal emp.sal%type;
+  5  	b number(7,2);
+  6  	fsal number(7,2);
+  7  	begin
+  8  	select sal into vsal
+  9  	from emp
+ 10  	where empno=veno;
+ 11  	b:=func_bonus(vsal); /* function calling stmt */
+ 12  	fsal:=vsal+b;
+ 13  	dbms_output.put_line
+ 14  	(' The salary details of  '||veno);
+ 15  	dbms_output.put_line
+ 16  	('----------------------------------------------------');
+ 17  	dbms_output.put_line
+ 18  	('empid    salary      bonus     final salary');
+ 19  	dbms_output.put_line
+ 20  	(  veno||'     '||vsal||'        '||b||'       '||fsal);
+ 21  	end proc_emp_fsal;
+ 22  /
+
+Procedure created.
+
+SQL> exec proc_emp_fsal(7902);
+The salary details of  7902                                                                                                                                                                                                           
+----------------------------------------------------                                                                                                                                                                                  
+empid    salary      bonus     final salary                                                                                                                                                                                           
+7902     3000        600       3600                                                                                                                                                                                                   
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> 	create or replace procedure proc_emps_fsal
+  2  	is
+  3  	cursor c
+  4  	is
+  5  	select empno,sal from emp;
+  6    	veno emp.empno%type;
+  7  	vsal emp.sal%type;
+  8  	b number(7,2);
+  9  	fsal number(7,2);
+ 10  	begin
+ 11  	open c;
+ 12  	dbms_output.put_line
+ 13  	('EMPID     salary     bonus          final salary');
+ 14  	dbms_output.put_line
+ 15  	('-------------------------------------------------------');
+ 16  	loop
+ 17  	fetch  c into veno,vsal;
+ 18  	b:=func_bonus(vsal); /* function calling stmt */
+ 19  	fsal:=vsal+b;
+ 20  	exit when (c%notfound);
+ 21  	dbms_output.put_line
+ 22  	(veno ||'      '||vsal||'      '||b||'      '||fsal);
+ 23  	end loop;
+ 24  	close c;
+ 25  	end proc_emps_fsal;
+ 26  /
+
+Procedure created.
+
+SQL> exec proc_emps_fsal;
+EMPID     salary     bonus          final salary                                                                                                                                                                                      
+-------------------------------------------------------                                                                                                                                                                               
+7369      800      16      816                                                                                                                                                                                                        
+7499      1600      80      1680                                                                                                                                                                                                      
+7521      1250      62.5      1312.5                                                                                                                                                                                                  
+7566      2975      297.5      3272.5                                                                                                                                                                                                 
+7654      1250      62.5      1312.5                                                                                                                                                                                                  
+7698      2850      285      3135                                                                                                                                                                                                     
+7782      2450      245      2695                                                                                                                                                                                                     
+7788      3000      600      3600                                                                                                                                                                                                     
+7839      5000      1250      6250                                                                                                                                                                                                    
+7844      1500      75      1575                                                                                                                                                                                                      
+7876      1100      55      1155                                                                                                                                                                                                      
+7900      950      19      969                                                                                                                                                                                                        
+7902      3000      600      3600                                                                                                                                                                                                     
+7934      1300      65      1365                                                                                                                                                                                                      
+
+PL/SQL procedure successfully completed.
+
+SQL> --Ex:
+SQL> --write a procedure to display the above output for all emps with
+SQL> --in given job category?
+SQL> 
+SQL> 
+SQL> 	create or replace procedure proc_emps_fsal_job
+  2  	(vjob emp.job%type)
+  3  	is
+  4  	cursor c
+  5  	is
+  6  	select empno,sal
+  7  	from emp
+  8  	where job=vjob;
+  9    	veno emp.empno%type;
+ 10  	vsal emp.sal%type;
+ 11  	b number(7,2);
+ 12  	fsal number(7,2);
+ 13  	begin
+ 14  	open c;
+ 15  	dbms_output.put_line
+ 16  	('Given Job Category :            '||vjob);
+ 17  	dbms_output.put_line
+ 18  	('veno      salary       bonus       final salary');
+ 19  	dbms_output.put_line
+ 20  	('-------------------------------------------------------');
+ 21  	loop
+ 22  	fetch c into veno,vsal;
+ 23  	b:=func_bonus(vsal); /* function calling stmt */
+ 24  	fsal:=vsal+b;
+ 25  	exit when (c%notfound);
+ 26  	dbms_output.put_line
+ 27  	(veno ||'      '||vsal||'       '||b||'          '||fsal);
+ 28  	end loop;
+ 29  	close c;
+ 30  	end proc_emps_fsal_job;
+ 31  /
+
+Procedure created.
+
+SQL> exec proc_emps_fsal_job('SALESMAN');
+Given Job Category :            SALESMAN                                                                                                                                                                                              
+veno      salary       bonus       final salary                                                                                                                                                                                       
+-------------------------------------------------------                                                                                                                                                                               
+7499      1600       80          1680                                                                                                                                                                                                 
+7521      1250       62.5          1312.5                                                                                                                                                                                             
+7654      1250       62.5          1312.5                                                                                                                                                                                             
+7844      1500       75          1575                                                                                                                                                                                                 
+
+PL/SQL procedure successfully completed.
+
+SQL> EXIT
